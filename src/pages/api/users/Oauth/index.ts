@@ -10,9 +10,9 @@ async function OAuth (req: NextApiRequest, res: NextApiResponse): Promise<void> 
     res.status(200).json({ token })
   } catch (error) {
     if (error instanceof CustomError) {
-      res.status(error.statusCode).json({ error: error.message })
+      res.status(error.statusCode).json({ message: error.message })
     } else {
-      console.error(error) // log any unhandled errors
+      if (process.env.NODE_ENV === 'development') { console.error(error) } // log any unhandled errors
       res.status(500).json({ error: 'Internal Server Error' })
     }
   }
