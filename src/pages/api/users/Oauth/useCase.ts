@@ -2,15 +2,19 @@ import { type IUserRepository } from '@/repositories/user/IUsuarioRepository'
 import type Oauth from './dto'
 import jwt from 'jsonwebtoken'
 import { User } from '@/entities/users/User'
+import { CustomError } from '@/utils/customError'
+import { validationDTO } from '@/utils/validationDTO'
 
 export default class OauthUser {
   constructor (private readonly userRepository: IUserRepository) { }
 
   async execute (payload: Oauth): Promise<string> {
-    const user = await this.userRepository.getUserByEmail(payload.email)
-    if (user !== null && user?.id === undefined) {
-      throw new Error('Usuário não encontrado')
+    if (!(await validationDTO(payload, ['name', 'email', 'avatar']))) {
+      throw new CustomError('Usuário não encontrado', 400)
     }
+
+    const user = await this.userRepository.getUserByEmail(payload.email)
+
     let dataSetToken = ''
     if (user !== null) {
       await this.userRepository.updateDataOauth({
